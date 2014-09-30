@@ -1,3 +1,6 @@
+
+
+<?php
 /*
 Summary: SoundWave is a PHP object for viewing the content of a 16 bit mono uncompressed WAV format file.
 Modification of the file object and support for variations of the wav format are TBD
@@ -6,9 +9,6 @@ Example Usage:
 $wav = new SoundWave("../test.wav");
 $wav->printInfo();
 */
-
-<?php
-
 class SoundWave
 {
  
