@@ -1,12 +1,10 @@
-
-
 <?php
 /*
-Summary: SoundWave is a PHP object for viewing the content of a 16 bit mono uncompressed WAV format file.
-Modification of the file object and support for variations of the wav format are TBD
+Summary: SoundWave is a PHP object for viewing the content of an 8 or 16 bit mono uncompressed PCM WAV format file.
+support for stereo is TBD
 Author: Daniel Christo
 Example Usage:
-$wav = new SoundWave("../test.wav");
+$wav = new SoundWave("test.wav");
 $wav->printInfo();
 */
 class SoundWave
@@ -19,6 +17,7 @@ class SoundWave
   private $size_in_bytes; 	/* total byte size of the sound data portion of the file*/
   private $size_in_samples; 	/* total number of samples or points in the sound data */
   private $header_offset=44;    /* header offset for PCM in bytes */
+  private $pack_format;		/* format value for reading and writing sound binary data, could be unsigned char "C" (8 bit) or signed short "s" (16 bit) */
 
   // Constructor takes a filename and stores that along with interesting wav file header information. 
   // A plain mono PCM wav file is all that this handles at the moment.
@@ -38,11 +37,17 @@ class SoundWave
      	$this->sample_frequency = current(unpack("v", fread($file_handle,4)));
      	fread($file_handle,4); // Byte Rate
      	$this->bytes_per_sample = current(unpack("v", fread($file_handle,2))); // Size of one sample in bytes
-     	fread($file_handle,2);  // Bits per sample; 
+     	fread($file_handle,2); // Bits per sample; 
      	fread($file_handle,4); // Subchunk2ID (data)
      	$this->size_in_bytes = current(unpack("V", fread($file_handle,4))); // Total Size of the sound block in bytes
      	$this->size_in_samples = $this->size_in_bytes / $this->bytes_per_sample;  // Total number of samples in the sound block
  	fclose($file_handle);
+ 	
+ 	if($this->bytes_per_sample > 1) {
+ 		$this->pack_format = "s";}
+ 	else {
+    		$this->pack_format = "C";
+	}
      }
   }
   
@@ -53,7 +58,7 @@ class SoundWave
   public function getSoundArray() {
     	$file_handle = fopen($this->file_name, "r");
     	fread($file_handle,$this->header_offset); // read past the header info
- 	return unpack("s" . $this->size_in_samples, fread($file_handle,$this->size_in_bytes)); // unpack sound data into integers and store in a JSON string
+ 	return unpack($this->pack_format . $this->size_in_samples, fread($file_handle,$this->size_in_bytes)); // unpack sound data into integers and store in a JSON string
  	fclose($file_handle);
   }
  
@@ -64,12 +69,18 @@ class SoundWave
    
   /* Input: i - The sample offset of a given sample
      Output: The integer value of the sample at i */
-  public function getSampleI($i)
-  {
-      $file_handle = fopen($this->file_name, "r");
-      fread($file_handle,$this->header_offset + (($i - 1) * $this->bytes_per_sample)); // read to the point just before the desired sample
-      return current(unpack("s", fread($file_handle, $this->bytes_per_sample)));
-      fclose($file_handle);
+  public function getSampleI($i) {
+	$file_handle = fopen($this->file_name, "r");
+	fseek($file_handle,$this->header_offset + (($i - 1) * $this->bytes_per_sample)); // put the pointer at the desired sample
+	return current(unpack($this->pack_format, fread($file_handle, $this->bytes_per_sample)));
+	fclose($file_handle);
+  }
+  
+  public function setSampleI($i, $value) {
+  	$file_handle = fopen($this->file_name, "r+");
+  	fseek($file_handle,$this->header_offset + (($i-1) * $this->bytes_per_sample)); // put the pointer at the desired sample
+  	fwrite($file_handle, pack($this->pack_format,$value) );
+  	fclose($file_handle);
   }
   
   // Public access methods to the wav header information
@@ -91,6 +102,36 @@ class SoundWave
   	echo "Bytes Per Sample: " . $this->bytesPerSample() . "</p><p>";
   	echo "Total Number of Samples: " . $this->size() . "</p><p>";
   	echo "</body></html>";
+  }
+  
+  // Returns an image resource with the object file's visual representation 
+  // where the sound height is scaled to the height parameter but each sample is one pixel in width 
+  public function getImage($width, $height) {
+	$soundData = $this->getSoundArray(); // get the image data
+	$my_img =  imagecreatetruecolor( $width, $height);
+	$white = imagecolorallocate($my_img, 255, 255, 255);
+	$black = imagecolorallocate($my_img, 0, 0, 0);
+	imagefill($my_img, 0, 0, $white); // white out the background
+	while($i <= $this->size()) {
+		// Depending on whether it's unsigned 8 bit or signed 16 bit, offset the image to compensate for the negative values 
+		if($this->bytes_per_sample > 1) {
+			$x2 = $i;
+ 			$y2 = (($soundData[$i]/ (pow(2, $this->bytesPerSample()*8))) * $height) + ($height/2);
+ 		}
+ 		else {
+    			$x2 = $i;
+ 			$y2 = (($soundData[$i]/ (pow(2, $this->bytesPerSample()*8))) * $height);
+		}
+		// draw a circle for each sample 2 pixels in diameter
+		ImageArc($my_img, $x2, $y2, 1, 1, 0, 360, $black);
+		// draw a line between this sample and the previous
+		imageline($my_img , $x1 , $y1 , $x2 , $y2 , $black);
+		$x1 = $x2;
+		$y1 = $y2;
+  		$i++;
+	} 
+	
+	return $my_img;
   }
   
 }
