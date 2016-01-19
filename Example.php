@@ -3,7 +3,7 @@ include 'SoundWave.php';
 echo "<html>";
 echo "<body>";
 echo "<p>Creating test.wav</p>" ;
-$wav = new SoundWave("../audio/test.wav");
+$wav = new Wav("../audio/test.wav");
 echo "<p>Created</p>" ;
 echo "<p>Adding sound wave with the following attributes:</p>" ;
 echo "<p>Start second: 0 </p>";

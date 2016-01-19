@@ -7,7 +7,7 @@ Example Usage:
 $wav = new SoundWave("test.wav");
 $wav->printInfo();
 */
-class SoundWave
+class Wav
 {
  
   private $file_name;
