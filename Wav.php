@@ -1,6 +1,6 @@
 <?php
 /*
-Summary: SoundWave is a PHP object for viewing the content of an 8 or 16 bit mono uncompressed PCM WAV format file.
+Summary: Wav is a PHP library for viewing the content of or writing to an 8 or 16 bit mono uncompressed PCM WAV format file.
 support for stereo is TBD
 Author: Daniel Christo
 Example Usage:
