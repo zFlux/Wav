@@ -1,9 +1,7 @@
 Wav
 =========
-Wav.php is a PHP library for reading and writing to a wav format file. 
-
-Wav.php can read from and write to an 8 or 16 bit wav file. 
+Wav.php is a PHP library for reading and writing to an 8 or 16 bit mono uncompressed PCM WAV format file. 
 
 This work is based on information on the wav specification I found here: 
 https://ccrma.stanford.edu/courses/422/projects/WaveFormat/ 
-I also based this work loosely on the python wav utilities.
+and Python's equivalent wav utilities https://docs.python.org/2/library/wave.html
