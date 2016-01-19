@@ -1,5 +1,5 @@
 <?php 
-include 'SoundWave.php';
+include 'Wav.php';
 echo "<html>";
 echo "<body>";
 echo "<p>Creating test.wav</p>" ;
