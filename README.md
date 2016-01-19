@@ -1,4 +1,4 @@
-SoundWave
+Wav
 =========
 SoundWave.php is a PHP object to encapsulate a wav file. 
 
