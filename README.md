@@ -7,4 +7,5 @@ $wav->addSineSoundWave(0, 3, 440, .1);</b>
 
 This work is based on information on the wav specification I found here: 
 https://ccrma.stanford.edu/courses/422/projects/WaveFormat/ <br/>
-and Python's equivalent wav utilities https://docs.python.org/2/library/wave.html
+and Python's equivalent wav utilities: <br/>
+https://docs.python.org/2/library/wave.html
